@@ -29,22 +29,50 @@ h1 {
   50% { transform: translateY(-10px); }
 }
 
-/* 💌 MESSAGE */
-.message, .message-1, .hidden-message {
+/* Hidden MESSAGE */
+.message, .hidden-message {
   margin: 12px auto;
   padding: 16px;
   border-radius: 18px;
   background: rgba(255,255,255,0.08);
   backdrop-filter: blur(10px);
   box-shadow: 0 0 15px rgba(178,102,255,0.4);
-  max-width: 90%;
+  font-size: clamp(1.2em, 4vw, 1.25em);
   line-height: 1.5;
+  max-width: 90%;
+}
+
+.hidden-message {
+  display: none;
+  margin-top: 15px;
+  color: #e6ccff;
+  text-shadow:
+    0 0 8px #b266ff,
+    0 0 15px #d6a3ff;
+}
+
+/* Click Me BUTTON */
+.reveal-btn {
+  background: linear-gradient(145deg, #b266ff, #d6a3ff, #ffccff);
+  color: black;
+  padding: 14px 24px;
+  border-radius: 25px;
+  margin: 16px auto;
+  display: inline-block;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.reveal-btn:hover {
+  transform: scale(1.05);
 }
 
 /* 🎵 AUDIO */
 audio {
-  margin: 20px auto;
+  margin: 50px auto;
   display: block;
+  border-radius: 25px;
   width: 90%;
   max-width: 400px;
 }
@@ -159,11 +187,103 @@ to come back to her.<br><br>
   <source src="https://github.com/doan-space/teamsnowball/blob/2c05c7108735a9341bae8e69c9263e22940ddd01/karaoke-moment.mp4?raw=true" type="video/mp4">
 </video>
 
-<!-- CLICK BUTTON -->
+  
+<!-- Click me BUTTON -->
 <div class="reveal-btn" onclick="startReveal()">
-🦋✨ Click me ✨🦋<br><br>
-[🎼Song will auto-play 🎶]
+🦋✨ Click me ✨🦋 <br><br>
+[🎼Song will auto-play 🎶]<br><br>
 </div>
+
+<div class="hidden-message" id="secret"></div>
+
+<script>
+let revealed = false;
+
+/* 💌 Hidden message */
+const text = `if the night feels heavy,
+if it presses in too close,
+just remember…
+
+there is a kind of light
+that is only discovered in the dark.
+
+like a star from afar,
+in the silent night, its glow shines.
+this is where its beauty lives.
+
+and maybe,
+so do you ✨`;
+
+const sparkleTypes = ["✨","💫","⭐","🌟"];
+let lastSparkle = 0;
+
+/* ✨ CREATE SPARKLE */
+function createSparkle(x, y) {
+  let now = Date.now();
+  if (now - lastSparkle < 30) return;
+  lastSparkle = now;
+
+  let s = document.createElement("div");
+  s.className = "sparkle";
+  s.innerHTML = sparkleTypes[Math.floor(Math.random() * sparkleTypes.length)];
+  s.style.left = x + "px";
+  s.style.top = y + "px";
+
+  document.body.appendChild(s);
+  setTimeout(() => s.remove(), 1200 + Math.random() * 1600);
+}
+
+/* ✨ CURSOR */
+document.addEventListener("mousemove", e => {
+  createSparkle(e.pageX, e.pageY);
+});
+
+/* ✨ TEXT SPARKLES */
+function createTextSparkle(el) {
+  const rect = el.getBoundingClientRect();
+  createSparkle(
+    rect.left + Math.random() * rect.width,
+    rect.top + Math.random() * rect.height
+  );
+}
+
+/* 💜 REVEAL */
+function startReveal() {
+  if (revealed) return;
+  revealed = true;
+
+  const el = document.getElementById("secret");
+  el.style.display = "block";
+
+  let i = 0;
+  function type() {
+    if (i < text.length) {
+      el.innerHTML += text.charAt(i) === "\n" ? "<br>" : text.charAt(i);
+      createTextSparkle(el);
+      i++;
+      setTimeout(type, 28);
+    }
+  }
+  type();
+
+  fadeInAudio();
+}
+
+/* 🎵 MUSIC */
+function fadeInAudio() {
+  const audio = document.getElementById("song");
+  audio.volume = 0;
+  audio.play();
+
+  let vol = 0;
+  const fade = setInterval(() => {
+    if (vol < 1) {
+      vol += 0.05;
+      audio.volume = vol;
+    } else clearInterval(fade);
+  }, 200);
+}
+
 
 <!-- 🎵 MUSIC (NOW BELOW BUTTON) -->
 <audio id="song" controls>
